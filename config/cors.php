@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173','https://futureforfuture.org'],
+    'allowed_origins' => ['http://localhost:5173','https://futureforfuture.org','https://walab-web.vercel.app','https://walab.caphash.com','https://walab-api-production.up.railway.app'],
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +29,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];
