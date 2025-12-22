@@ -35,5 +35,9 @@ class AppServiceProvider extends ServiceProvider
                 SecurityScheme::http('bearer', 'JWT')
             );
         });
+
+        if (config('app.env') !== 'local') {
+            \URL::forceScheme('https');
+        }
     }
 }

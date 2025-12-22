@@ -4,6 +4,8 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     gettext \
+    nodejs \
+    npm \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -24,6 +26,7 @@ WORKDIR /var/www/html
 COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
+RUN npm install && npm run build
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
