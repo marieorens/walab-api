@@ -16,8 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // $middleware->append(RoleMiddleware::class);
-        // $middleware->append(Cors::class); // Register Cors middleware
+        $middleware->trustProxies(at: '*');
         
         $middleware->alias([
             'admin' => CheckAdminRole::class,

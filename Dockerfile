@@ -27,8 +27,11 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
+RUN php artisan storage:link || true
 
-RUN chown -R www-data:www-data storage bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 755 /var/www/html/public
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 COPY .docker/nginx.conf.template /etc/nginx/http.d/default.conf.template
 COPY .docker/supervisord.conf /etc/supervisord.conf
