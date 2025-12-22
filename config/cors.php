@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:5173','https://futureforfuture.org','https://walab-web.vercel.app','https://walab.caphash.com','https://walab-api-production.up.railway.app'],
+    'allowed_origins' => ['http://localhost:5173','https://futureforfuture.org','https://walab-web.vercel.app','https://walab.caphash.com','https://walab-api-production.up.railway.app','https://walab-f0q1ef299-marieorens-projects.vercel.app/'],
 
     'allowed_origins_patterns' => [],
 
