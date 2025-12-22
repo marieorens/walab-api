@@ -3,6 +3,7 @@ FROM php:8.4-fpm-alpine
 RUN apk add --no-cache \
     nginx \
     supervisor \
+    gettext \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -26,7 +27,7 @@ RUN composer install --no-dev --optimize-autoloader
 
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-COPY .docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY .docker/nginx.conf.template /etc/nginx/http.d/default.conf.template
 COPY .docker/supervisord.conf /etc/supervisord.conf
 
 EXPOSE 80
