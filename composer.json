@@ -22,10 +22,10 @@
         "predis/predis": "^2.2",
         "pusher/pusher-php-server": "^7.2",
         "simplesoftwareio/simple-qrcode": "^4.2",
-        "smalot/pdfparser": "^2.11"
+        "smalot/pdfparser": "^2.11",
+        "fakerphp/faker": "^1.23"
     },
     "require-dev": {
-        "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
