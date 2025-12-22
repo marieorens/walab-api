@@ -29,7 +29,10 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 
 COPY .docker/nginx.conf.template /etc/nginx/http.d/default.conf.template
 COPY .docker/supervisord.conf /etc/supervisord.conf
+COPY .docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY .docker/fastcgi_params /etc/nginx/fastcgi_params
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/usr/local/bin/docker-entrypoint.sh"]
