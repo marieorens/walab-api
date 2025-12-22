@@ -196,21 +196,11 @@ class WalletController extends Controller
 
     public function generateWithdrawals(Request $request)
     {
-        $type = $request->get('type', 'laboratoire');
-        $periode = $request->get('periode');
-
-        if ($type === 'agent') {
-            $periode = $periode ?? now()->subWeek()->format('o-\WW');
-            $results = $this->walletService->generateWeeklyWithdrawals($periode);
-            $label = "hebdomadaires (Agents)";
-        } else {
-            $periode = $periode ?? now()->subMonth()->format('Y-m');
-            $results = $this->walletService->generateMonthlyWithdrawals($periode);
-            $label = "mensuels (Laboratoires)";
-        }
+        $periode = $request->get('periode', now()->subMonth()->format('Y-m'));
+        $results = $this->walletService->generateMonthlyWithdrawals($periode);
 
         return back()->with('success', 
-            "Retraits {$label} générés pour {$periode} : {$results['created']} créés, {$results['skipped']} ignorés, {$results['errors']} erreurs."
+            "Retraits générés : {$results['created']} créés, {$results['skipped']} ignorés, {$results['errors']} erreurs."
         );
     }
 

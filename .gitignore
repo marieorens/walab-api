@@ -8,6 +8,8 @@
 .env
 .env.backup
 .env.production
+.env.local
+.env.testing
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
@@ -18,3 +20,24 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Fichiers sensibles DU Proj
+cookies.txt
+*.pem
+*.key
+*.p12
+*.pfx
+firebase-*.json
+*-firebase-adminsdk-*.json
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.log
+logs/
+*.sqlite
+*.sqlite3
+database/database.sqlite

@@ -176,27 +176,15 @@ class WalletService
     public function generateMonthlyWithdrawals(?string $periode = null): array
     {
         $periode = $periode ?? now()->subMonth()->format('Y-m');
-        return $this->generateWithdrawalsForType('laboratoire', $periode, '%Y-%m');
-    }
-
-    public function generateWeeklyWithdrawals(?string $periode = null): array
-    {
-        // Format ISO de la semaine : 2025-W51
-        $periode = $periode ?? now()->subWeek()->format('o-\WW'); 
-        return $this->generateWithdrawalsForType('agent', $periode, '%X-W%V');
-    }
-
-    public function generateWithdrawalsForType(string $type, string $periode, string $format): array
-    {
         $results = ['created' => 0, 'skipped' => 0, 'errors' => 0];
 
-        $wallets = Wallet::where('type', $type)
+        $wallets = Wallet::where('type', 'laboratoire')
             ->where('status', 'active')
             ->get();
 
         foreach ($wallets as $wallet) {
             try {
-                $withdrawal = Withdrawal::createForWallet($wallet, $periode, $format);
+                $withdrawal = Withdrawal::createForWallet($wallet, $periode);
                 
                 if ($withdrawal) {
                     $results['created']++;

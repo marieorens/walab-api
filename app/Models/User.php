@@ -12,6 +12,20 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 
+/**
+ * @OA\Schema(
+ *     schema="User",
+ *     title="Utilisateur",
+ *     description="Modèle utilisateur standard",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="firstname", type="string", example="Jean"),
+ *     @OA\Property(property="lastname", type="string", example="Dupont"),
+ *     @OA\Property(property="email", type="string", format="email", example="jean@mail.com"),
+ *     @OA\Property(property="phone", type="string", example="+22901020304"),
+ *     @OA\Property(property="role_id", type="integer", example=3),
+ *     @OA\Property(property="created_at", type="string", format="date-time")
+ * )
+ */
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable,  HasPushSubscriptions;
@@ -21,7 +35,24 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'firstname',
+        'lastname',
+        'email',
+        'gender',
+        'country',
+        'city',
+        'date_naissance',
+        'adress',
+        'phone',
+        'url_profil',
+        'role_id',
+        'status',
+        'email_verified_at',
+        'isdelete',
+        'password',
+        'token_notify',
+    ];
 
     /**
      * The model's default values for attributes.
@@ -80,7 +111,7 @@ class User extends Authenticatable
     {
         return $this->hasOne(Practitioner::class);
     }
-    
+
     public function wallet(): HasOne
     {
         return $this->hasOne(Wallet::class);

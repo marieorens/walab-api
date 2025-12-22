@@ -150,6 +150,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
 
         'Otp' => Ichtrojan\Otp\Otp::class,
+        'Image' => Intervention\Image\Facades\Image::class,
 
     ])->toArray(),
 

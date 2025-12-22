@@ -120,13 +120,13 @@ Route::controller(BlogApiController::class)->group(function () {
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    Route::controller(ExamenController::class)->group(function () {
+    Route::controller(ExamenController::class)->middleware(['upload.validate'])->group(function () {
         Route::post('examen/create', 'create');
         Route::post('examen/update', 'update');
         Route::post('examen/delete', 'delete');
     });
 
-    Route::controller(LaboratorieController::class)->group(function () {
+    Route::controller(LaboratorieController::class)->middleware(['upload.validate'])->group(function () {
         Route::post('laboratorie/create', 'create');
         Route::post('laboratorie/update', 'update');
         Route::post('laboratorie/delete', 'delete');
@@ -177,7 +177,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('paiement/admin/list', 'listPaiementAllAdmin');
     });
 
-    Route::controller(ResultatController::class)->group(function () {
+    Route::controller(ResultatController::class)->middleware(['upload.validate'])->group(function () {
         Route::post('resultat/create', 'create');
         Route::post('resultat/update', 'update');
         Route::post('resultat/delete', 'delete');
@@ -192,7 +192,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('chat/commande/message', 'getChatCommandeFor');
     });
 
-    Route::controller(UserController::class)->group(function () {
+    Route::controller(UserController::class)->middleware(['upload.validate'])->group(function () {
         Route::get('user/notification', 'notify_user');
         Route::post('user/notification/markasread', 'markAsRead');
         Route::post('user/firebase/token', 'refresh_token_notify');
@@ -206,7 +206,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     });
 
     // Practitioner Routes
-    Route::prefix('practitioner')->controller(\App\Http\Controllers\Api\PractitionerApiController::class)->group(function () {
+    Route::prefix('practitioner')->controller(\App\Http\Controllers\Api\PractitionerApiController::class)->middleware(['upload.validate'])->group(function () {
         Route::get('/profile', 'getProfile');
         Route::post('/profile/update', 'updateProfile');
         Route::get('/statistics', 'getStatistics');

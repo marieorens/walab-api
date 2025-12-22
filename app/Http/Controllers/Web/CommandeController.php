@@ -124,7 +124,7 @@ class CommandeController extends Controller
             $agent = User::find($request->agent_id);
             if($agent) {
                 $agent->notify(new SendPushNotification(
-                    'Nouvelle Mission 🧬',
+                    'Nouvelle Mission ',
                     'Une nouvelle commande vous a été assignée.',
                     '/user/details/commande/' . $commande->code
                 ));
@@ -132,7 +132,7 @@ class CommandeController extends Controller
             $client = User::find($commande->client_id);
             if($client) {
                 $client->notify(new SendPushNotification(
-                    'Infirmier en route 🚑',
+                    'Infirmier en route ',
                     'Un agent a pris en charge votre commande.',
                     '/user/details/commande/' . $commande->code
                 ));
@@ -323,7 +323,7 @@ class CommandeController extends Controller
             $client = $commandes->first()->client;
             if ($client && $client->email) {
                 $clientName = $client->firstname . ' ' . $client->lastname;
-                $commandeInfo = $commandes->first(); 
+                $commandeInfo = $commandes->first();
                 Mail::to($client->email)->send(new ResultatDisponibleMail(
                     $commandeInfo,
                     $pdf_password,

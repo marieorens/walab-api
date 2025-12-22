@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\CheckAdminRole;
+use App\Http\Middleware\Cors;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\UploadValidationMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,11 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->trustProxies(at: '*');
+        // $middleware->append(RoleMiddleware::class);
+        // $middleware->append(Cors::class); // Register Cors middleware
         
         $middleware->alias([
             'admin' => CheckAdminRole::class,
             'role' => RoleMiddleware::class,
+            'upload.validate' => UploadValidationMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -56,70 +56,20 @@ class CommandeRepository
             'montant' => $request->montant,
         ];
 
-        $fees_calculated = false; // To assign displacement fees only once
-
         if($request->examen_ids){
             foreach ($request->examen_ids as $examen_id) {
-                $examen = Examen::find($examen_id);
-                $service_price = $examen ? $examen->price : 0;
-                
-                $deplacement_fee = 0;
-                if (!$fees_calculated) {
-                    // Calculate total service sum to find displacement remainder
-                    $total_service = 0;
-                    if($request->examen_ids){
-                        foreach($request->examen_ids as $eid) {
-                            $ex = Examen::find($eid);
-                            $total_service += $ex ? $ex->price : 0;
-                        }
-                    }
-                    if($request->type_bilan_ids){
-                        foreach($request->type_bilan_ids as $tid) {
-                            $tb = TypeBilan::find($tid);
-                            $total_service += $tb ? $tb->price : 0;
-                        }
-                    }
-                    $deplacement_fee = max(0, floatval($request->montant) - $total_service);
-                    $fees_calculated = true;
-                }
-
-                $data = array_merge($baseData, [
-                    'examen_id' => $examen_id,
-                    'frais_service' => $service_price,
-                    'frais_deplacement' => $deplacement_fee
-                ]);
-                
+                $data = array_merge($baseData, ['examen_id' => $examen_id]);
                 $commande = $this->commande->newQuery()->create($data);
+                $montant += Examen::where("id", $examen_id)->first()->price;
                 array_push($commandes, $commande);
             }
         }
 
         if($request->type_bilan_ids){
             foreach ($request->type_bilan_ids as $type_bilan_id) {
-                $type_bilan = TypeBilan::find($type_bilan_id);
-                $service_price = $type_bilan ? $type_bilan->price : 0;
-                
-                $deplacement_fee = 0;
-                if (!$fees_calculated) {
-                    // This block handles the case where there were no examen_ids
-                    $total_service = 0;
-                    if($request->type_bilan_ids){
-                        foreach($request->type_bilan_ids as $tid) {
-                            $tb = TypeBilan::find($tid);
-                            $total_service += $tb ? $tb->price : 0;
-                        }
-                    }
-                    $deplacement_fee = max(0, floatval($request->montant) - $total_service);
-                    $fees_calculated = true;
-                }
-
-                $data = array_merge($baseData, [
-                    'type_bilan_id' => $type_bilan_id,
-                    'frais_service' => $service_price,
-                    'frais_deplacement' => $deplacement_fee
-                ]);
-                
+                $data = array_merge($baseData, ['type_bilan_id' => $type_bilan_id]);
                 $commande = $this->commande->newQuery()->create($data);
+                $montant += TypeBilan::where("id", $type_bilan_id)->first()->price;
                 array_push($commandes, $commande);
             }
         }

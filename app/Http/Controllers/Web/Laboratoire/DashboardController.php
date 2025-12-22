@@ -673,6 +673,7 @@ class DashboardController extends Controller
     }
 
 
+
     public function delete_resultat($id)
     {
         $commande = Commande::with(['examen.laboratorie', 'type_bilan.laboratorie', 'resultat'])->findOrFail($id);

@@ -10,6 +10,17 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
+/**
+ * @OA\Schema(
+ *     schema="Commande",
+ *     title="Commande",
+ *     @OA\Property(property="id", type="integer", example=15),
+ *     @OA\Property(property="code", type="string", example="CMD-8392"),
+ *     @OA\Property(property="statut", type="string", example="En cours"),
+ *     @OA\Property(property="montant", type="number", example=15000),
+ *     @OA\Property(property="date_prelevement", type="string", format="date-time")
+ * )
+ */
 class Commande extends Model
 {
     use HasFactory;
@@ -33,7 +44,7 @@ class Commande extends Model
 
     public function agent(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'agent_id'); 
+        return $this->belongsTo(User::class, 'agent_id');
     }
 
     /**
@@ -51,7 +62,7 @@ class Commande extends Model
 
     public function client(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'client_id'); 
+        return $this->belongsTo(User::class, 'client_id');
     }
 
     public function examen(): BelongsTo
@@ -62,7 +73,7 @@ class Commande extends Model
     public function type_bilan(): BelongsTo
     {
         return $this->belongsTo(TypeBilan::class);
-    }    
+    }
 
     /**
      * Générer et stocker le QR Code pour la vérification agent/client
@@ -73,7 +84,7 @@ class Commande extends Model
         try {
             // Générer un token unique de vérification
             $verificationToken = Str::random(64);
-            
+
             // URL de vérification que le client scannera
             $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
             $verificationUrl = $frontendUrl . '/verify-specialist/' . $verificationToken;
@@ -110,8 +121,8 @@ class Commande extends Model
      */
     public function isTokenValid(): bool
     {
-        return $this->verification_token 
-            && $this->token_expires_at 
+        return $this->verification_token
+            && $this->token_expires_at
             && $this->token_expires_at->isFuture();
     }
 
@@ -152,7 +163,7 @@ class Commande extends Model
         if (!$this->verification_token) {
             return '';
         }
-        
+
         $frontendUrl = config('app.frontend_url', 'http://localhost:5173');
         return $frontendUrl . '/verify-specialist/' . $this->verification_token;
     }

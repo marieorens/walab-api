@@ -5,52 +5,92 @@ namespace App\Repository;
 use App\Models\Examen;
 use App\Models\Laboratorie;
 use App\Models\TypeBilan;
+use App\Services\UploadService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class LaboratorieRepository
 {
-
     /**
      * @var Laboratorie
      */
     private $laboratorie;
 
-    public function __construct(Laboratorie $laboratorie)
+    /**
+     * @var UploadService
+     */
+    private $uploadService;
+
+    public function __construct(Laboratorie $laboratorie, UploadService $uploadService)
     {
         $this->laboratorie = $laboratorie;
+        $this->uploadService = $uploadService;
     }
 
     public function create_laboratorie(Request $request){
         $path = "defaut_image.jpg";
-        if($request->image){
-            $image_url = time() . $request->image->getClientOriginalName();
-            $path = $request->image->move(public_path() . "/laboratoire", $image_url);
-            $path = "laboratoire/" . $image_url;
-        }
-        $laboratorie = $this->laboratorie->newQuery()->create([
 
+        if($request->image){
+            try {
+                $uploadResult = $this->uploadService->uploadImage(
+                    $request->image,
+                    config('uploads.storage.directories.laboratories'),
+                    'laboratoire_' . time()
+                );
+                $path = $uploadResult['path'];
+
+                // Lancer la compression en arrière-plan si activée
+                if (config('uploads.compression.enabled')) {
+                    \App\Jobs\ProcessImageCompression::dispatch($path);
+                }
+
+            } catch (\Exception $e) {
+                // En cas d'erreur, utiliser l'image par défaut
+                $path = "defaut_image.jpg";
+            }
+        }
+
+        $laboratorie = $this->laboratorie->newQuery()->create([
             'name' => $request->name,
             'image' => $path,
             'address' => $request->address,
             'description' => $request->description,
             'pourcentage_commission' => $request->pourcentage_commission ?? 0,
-
         ]);
 
         return $laboratorie;
     }
 
     public function update_laboratorie(Request $request, string $id){
-        
+
         $laboratorie = Laboratorie::where('id', $id)->first();
+        $path = $laboratorie->image;
+
         if($request->image){
-            $image_url = time() . $request->image->getClientOriginalName();
-            $path = $request->image->move(public_path() . "/laboratoire", $image_url);
-            $path = "laboratoire/" . $image_url;
-        }else{
-            $path = $laboratorie->image;
+            try {
+                $uploadResult = $this->uploadService->uploadImage(
+                    $request->image,
+                    config('uploads.storage.directories.laboratories'),
+                    'laboratoire_' . time()
+                );
+                $path = $uploadResult['path'];
+
+                // Supprimer l'ancienne image si elle n'est pas l'image par défaut
+                if ($laboratorie->image && $laboratorie->image !== "defaut_image.jpg") {
+                    $this->uploadService->deleteFile($laboratorie->image);
+                }
+
+                // Lancer la compression en arrière-plan si activée
+                if (config('uploads.compression.enabled')) {
+                    \App\Jobs\ProcessImageCompression::dispatch($path);
+                }
+
+            } catch (\Exception $e) {
+                // En cas d'erreur, garder l'ancienne image
+                $path = $laboratorie->image;
+            }
         }
+
         $laboratorie->update([
             'name' => $request->name,
             'image' => $path,

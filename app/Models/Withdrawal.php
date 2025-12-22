@@ -112,8 +112,10 @@ class Withdrawal extends Model
         return $query->where('periode', $periode);
     }
 
-    public static function createForWallet(Wallet $wallet, string $periode, string $format = '%Y-%m'): ?self
+    public static function createForWallet(Wallet $wallet, string $periode = null): ?self
     {
+        $periode = $periode ?? now()->subMonth()->format('Y-m');
+        
         $existingWithdrawal = self::where('wallet_id', $wallet->id)
             ->where('periode', $periode)
             ->first();
@@ -122,7 +124,7 @@ class Withdrawal extends Model
             return null;
         }
 
-        $montant = $wallet->getPeriodBalance($periode, $format);
+        $montant = $wallet->getMonthlyBalance($periode);
         
         if ($montant <= 0) {
             return null;

@@ -48,46 +48,20 @@
                     <h5 class="card-title">Actions</h5>
                     <form action="{{ route('wallets.withdrawals.generate') }}" method="POST" class="row g-3">
                         @csrf
-                        <div class="col-md-3">
-                            <label class="form-label">Type de bénéficiaire</label>
-                            <select name="type" id="gen_type" class="form-select">
-                                <option value="laboratoire">Laboratoires (Mensuel)</option>
-                                <option value="agent">Agents (Hebdomadaire)</option>
-                            </select>
+                        <div class="col-md-4">
+                            <label class="form-label">Période à générer</label>
+                            <input type="month" name="periode" class="form-control" value="{{ now()->subMonth()->format('Y-m') }}">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label" id="gen_periode_label">Mois à générer</label>
-                            <input type="month" name="periode" id="gen_periode" class="form-control" value="{{ now()->subMonth()->format('Y-m') }}">
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
+                        <div class="col-md-4 d-flex align-items-end">
                             <button type="submit" class="btn btn-primary" onclick="return confirm('Générer les retraits pour cette période ?')">
                                 <i class="ri-calendar-check-line me-1"></i> Générer Retraits
                             </button>
                         </div>
                     </form>
-
-                    <script>
-                        document.getElementById('gen_type').addEventListener('change', function() {
-                            const label = document.getElementById('gen_periode_label');
-                            const input = document.getElementById('gen_periode');
-                            if (this.value === 'agent') {
-                                label.textContent = 'Semaine à générer';
-                                input.type = 'week';
-                                // Valeur par défaut : semaine dernière
-                                const d = new Date();
-                                d.setDate(d.getDate() - 7);
-                                // On ne peut pas facilement générer YYYY-Www via JS simple, laissons vide ou géré par PHP
-                            } else {
-                                label.textContent = 'Mois à générer';
-                                input.type = 'month';
-                                input.value = '{{ now()->subMonth()->format('Y-m') }}';
-                            }
-                        });
-                    </script>
                     <hr>
                     <small class="text-muted">
                         <i class="ri-information-line"></i> 
-                        Les retraits sont générés mensuellement pour les laboratoires et hebdomadairement pour les agents ayant un solde positif.
+                        Les retraits sont générés mensuellement pour chaque laboratoire ayant un solde positif.
                     </small>
                 </div>
             </div>
@@ -142,7 +116,7 @@
                             <thead class="bg-primary">
                                 <tr>
                                     <th class="text-white">ID</th>
-                                    <th class="text-white">Bénéficiaire</th>
+                                    <th class="text-white">Laboratoire</th>
                                     <th class="text-white">Période</th>
                                     <th class="text-white text-end">Montant</th>
                                     <th class="text-white text-center">Statut</th>
@@ -157,13 +131,8 @@
                                 <tr>
                                     <td>#{{ $withdrawal->id }}</td>
                                     <td>
-                                        @if($withdrawal->wallet && $withdrawal->wallet->user)
-                                            @if($withdrawal->wallet->user->laboratorie)
-                                                <strong>{{ $withdrawal->wallet->user->laboratorie->nom }}</strong>
-                                            @else
-                                                <span class="badge bg-soft-info text-info mb-1">Agent</span><br>
-                                                <strong>{{ $withdrawal->wallet->user->firstname }} {{ $withdrawal->wallet->user->lastname }}</strong>
-                                            @endif
+                                        @if($withdrawal->wallet && $withdrawal->wallet->user && $withdrawal->wallet->user->laboratorie)
+                                            <strong>{{ $withdrawal->wallet->user->laboratorie->nom }}</strong>
                                             <br>
                                             <small class="text-muted">{{ $withdrawal->wallet->user->email }}</small>
                                         @else
@@ -235,13 +204,7 @@
                                                             @csrf
                                                             <input type="hidden" name="action" value="approve">
                                                             <div class="modal-body text-start">
-                                                                <p><strong>Bénéficiaire:</strong> 
-                                                                    @if($withdrawal->wallet->user->laboratorie)
-                                                                        {{ $withdrawal->wallet->user->laboratorie->nom }}
-                                                                    @else
-                                                                        {{ $withdrawal->wallet->user->firstname }} {{ $withdrawal->wallet->user->lastname }} (Agent)
-                                                                    @endif
-                                                                </p>
+                                                                <p><strong>Laboratoire:</strong> {{ $withdrawal->wallet->user->laboratorie->nom ?? 'N/A' }}</p>
                                                                 <p><strong>Montant:</strong> {{ number_format($withdrawal->montant, 0, ',', ' ') }} FCFA</p>
                                                                 <p><strong>Période:</strong> {{ $withdrawal->periode }}</p>
                                                                 <hr>
@@ -271,13 +234,7 @@
                                                             @csrf
                                                             <input type="hidden" name="action" value="reject">
                                                             <div class="modal-body text-start">
-                                                                <p><strong>Bénéficiaire:</strong> 
-                                                                    @if($withdrawal->wallet->user->laboratorie)
-                                                                        {{ $withdrawal->wallet->user->laboratorie->nom }}
-                                                                    @else
-                                                                        {{ $withdrawal->wallet->user->firstname }} {{ $withdrawal->wallet->user->lastname }} (Agent)
-                                                                    @endif
-                                                                </p>
+                                                                <p><strong>Laboratoire:</strong> {{ $withdrawal->wallet->user->laboratorie->nom ?? 'N/A' }}</p>
                                                                 <p><strong>Montant:</strong> {{ number_format($withdrawal->montant, 0, ',', ' ') }} FCFA</p>
                                                                 <hr>
                                                                 <div class="mb-3">

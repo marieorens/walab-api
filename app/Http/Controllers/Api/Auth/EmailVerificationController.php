@@ -11,6 +11,12 @@ use Ichtrojan\Otp\Models\Otp as OtpModel;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
+/**
+ * @OA\Tag(
+ *     name="Vérification Email",
+ *     description="Gestion de la validation des emails via OTP (One Time Password)"
+ * )
+ */
 class EmailVerificationController extends Controller
 {
     private $otp;
@@ -21,7 +27,43 @@ class EmailVerificationController extends Controller
     }
 
     /**
-     * Vérifier le code OTP pour la vérification d'email
+     * @OA\Post(
+     *     path="/api/email/verify",
+     *     summary="Vérifier le code OTP",
+     *     tags={"Vérification Email"},
+     *     description="Valide le compte utilisateur en vérifiant le code à 6 chiffres envoyé par email.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "otp"},
+     *             @OA\Property(property="email", type="string", format="email", example="jean@walab.bj"),
+     *             @OA\Property(property="otp", type="string", example="123456", description="Code à 6 chiffres")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Email vérifié avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Email vérifié avec succès !"),
+     *             @OA\Property(property="requires_admin_validation", type="boolean", example=false, description="True si le compte doit être approuvé par un admin (Pros)"),
+     *             @OA\Property(property="token", type="string", example="3|AbCdEf...", description="Token d'accès (null si validation admin requise)"),
+     *             @OA\Property(property="user", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Code OTP invalide ou expiré",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Code OTP invalide.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Utilisateur introuvable"
+     *     )
+     * )
      */
     public function verify(Request $request)
     {
@@ -59,7 +101,7 @@ class EmailVerificationController extends Controller
         $this->invalidateOtp($request->email, $request->otp);
 
         Log::info('About to update user', ['user_id' => $user->id, 'email' => $user->email]);
-        
+
         try {
             $user->update([
                 'email_verified_at' => Carbon::now()
@@ -92,7 +134,31 @@ class EmailVerificationController extends Controller
     }
 
     /**
-     * Renvoyer le code de vérification
+     * @OA\Post(
+     *     path="/api/email/resend",
+     *     summary="Renvoyer le code OTP",
+     *     tags={"Vérification Email"},
+     *     description="Génère un nouveau code de vérification et l'envoie par email.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="jean@walab.bj")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Code envoyé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Code de vérification renvoyé avec succès.")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur d'envoi de mail"
+     *     )
+     * )
      */
     public function resend(Request $request)
     {
@@ -142,7 +208,28 @@ class EmailVerificationController extends Controller
     }
 
     /**
-     * Vérifier le statut de vérification
+     * @OA\Post(
+     *     path="/api/email/status",
+     *     summary="Vérifier le statut",
+     *     tags={"Vérification Email"},
+     *     description="Vérifie si l'email a déjà été validé ou non.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="jean@walab.bj")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Statut retourné",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="verified", type="boolean", example=true),
+     *             @OA\Property(property="verified_at", type="string", format="date-time", nullable=true)
+     *         )
+     *     )
+     * )
      */
     public function status(Request $request)
     {
@@ -160,7 +247,7 @@ class EmailVerificationController extends Controller
     }
 
     /**
-     * Valider un OTP
+     * Valider un OTP (Interne)
      */
     private function validateOtp(string $identifier, string $token): object
     {

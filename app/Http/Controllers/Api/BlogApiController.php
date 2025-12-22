@@ -8,17 +8,40 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\BlogImage;
 
+/**
+ * @OA\Tag(
+ *     name="Blog",
+ *     description="Gestion des articles de blog et des médias associés."
+ * )
+ */
 class BlogApiController extends Controller
 {
-    // Récupérer tous les articles
+    /**
+     * @OA\Get(
+     *     path="/api/blog/list",
+     *     summary="Liste des articles",
+     *     tags={"Blog"},
+     *     description="Récupère tous les articles de blog, triés du plus récent au plus ancien.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste récupérée avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Liste des articles récupérée avec succès"),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Blog"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur"
+     *     )
+     * )
+     */
     public function index()
     {
         try {
-            // On récupère tout, trié du plus récent au plus vieux
             $blogs = Blog::latest()->get();
 
-            // On boucle pour s'assurer que l'image a le lien complet (http://domaine.com/storage/...)
-            // C'est vital pour que ton front-end affiche l'image sans prise de tête
             $blogs->transform(function ($blog) {
                 if ($blog->image) {
                     $blog->image_url = asset($blog->image);
@@ -43,7 +66,34 @@ class BlogApiController extends Controller
         }
     }
 
-    // Récupérer un seul article (détails)
+    /**
+     * @OA\Get(
+     *     path="/api/blog/show/{id}",
+     *     summary="Détail d'un article",
+     *     tags={"Blog"},
+     *     description="Récupère un article spécifique avec ses images de galerie.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID de l'article",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Article trouvé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Article récupéré"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Blog")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Article introuvable"
+     *     )
+     * )
+     */
     public function show($id)
     {
         try {
@@ -56,10 +106,9 @@ class BlogApiController extends Controller
                 ], 404);
             }
 
-            // Charger relation images et préparer les URLs
             $blog->load('images');
             $blog->image_url = $blog->image ? asset($blog->image) : null;
-            // S'assurer que chaque image de la galerie a bien son url (si pas déjà)
+
             $blog->images->transform(function ($img) {
                 if (empty($img->url) && !empty($img->path)) {
                     $img->url = asset('storage/' . $img->path);
@@ -82,9 +131,7 @@ class BlogApiController extends Controller
         }
     }
 
-    /**
-     * Upload a single image for use in WYSIWYG editor.
-     */
+
     public function uploadImage(Request $request)
     {
         $request->validate([
@@ -111,9 +158,7 @@ class BlogApiController extends Controller
         }
     }
 
-    /**
-     * Upload and attach multiple images to a blog (gallery)
-     */
+
     public function addImages(Request $request, $id)
     {
         $request->validate([

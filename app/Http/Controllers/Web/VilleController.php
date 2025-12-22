@@ -15,10 +15,8 @@ class VilleController extends Controller
      */
     public function index()
     {
-        // On récupère l'utilisateur connecté pour le passer à la vue (comme dans tes autres controlleurs)
         $user_auth = User::where('id', Auth::user()->id)->first();
 
-        // On récupère les villes, les plus récentes en premier
         $villes = Ville::orderBy('created_at', 'DESC')->paginate(10);
 
         return view('villes.index', compact('villes', 'user_auth'));

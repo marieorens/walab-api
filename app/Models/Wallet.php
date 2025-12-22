@@ -106,19 +106,15 @@ class Wallet extends Model
         $this->save();
     }
 
-    public function getPeriodBalance(string $periode, string $format = '%Y-%m'): float
-    {
-        return $this->transactions()
-            ->where('type', 'credit')
-            ->where('status', 'completed')
-            ->whereRaw("DATE_FORMAT(created_at, ?) = ?", [$format, $periode])
-            ->sum('montant');
-    }
-
     public function getMonthlyBalance(string $periode = null): float
     {
         $periode = $periode ?? now()->format('Y-m');
-        return $this->getPeriodBalance($periode, '%Y-%m');
+        
+        return $this->transactions()
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->whereRaw("DATE_FORMAT(created_at, '%Y-%m') = ?", [$periode])
+            ->sum('montant');
     }
 
     public static function getOrCreateForUser(int $userId, string $type = 'laboratoire'): self

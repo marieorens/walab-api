@@ -1,0 +1,2121 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "WALAB API Documentation",
+        "description": "Documentation technique complète pour l'application Walab. Utilisez le bouton 'Authorize' pour tester les routes protégées.",
+        "contact": {
+            "email": "contact@walab.bj"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Serveur API Principal"
+        }
+    ],
+    "paths": {
+        "/api/email/verify": {
+            "post": {
+                "tags": [
+                    "Vérification Email"
+                ],
+                "summary": "Vérifier le code OTP",
+                "description": "Valide le compte utilisateur en vérifiant le code à 6 chiffres envoyé par email.",
+                "operationId": "a853ab91c84859a2eae73be2b7e5a1d4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "otp"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@walab.bj"
+                                    },
+                                    "otp": {
+                                        "description": "Code à 6 chiffres",
+                                        "type": "string",
+                                        "example": "123456"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email vérifié avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Email vérifié avec succès !"
+                                        },
+                                        "requires_admin_validation": {
+                                            "description": "True si le compte doit être approuvé par un admin (Pros)",
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "token": {
+                                            "description": "Token d'accès (null si validation admin requise)",
+                                            "type": "string",
+                                            "example": "3|AbCdEf..."
+                                        },
+                                        "user": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Code OTP invalide ou expiré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code OTP invalide."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur introuvable"
+                    }
+                }
+            }
+        },
+        "/api/email/resend": {
+            "post": {
+                "tags": [
+                    "Vérification Email"
+                ],
+                "summary": "Renvoyer le code OTP",
+                "description": "Génère un nouveau code de vérification et l'envoie par email.",
+                "operationId": "ca7ecc51fc597d15270c61a8fd618de2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@walab.bj"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code envoyé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code de vérification renvoyé avec succès."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur d'envoi de mail"
+                    }
+                }
+            }
+        },
+        "/api/email/status": {
+            "post": {
+                "tags": [
+                    "Vérification Email"
+                ],
+                "summary": "Vérifier le statut",
+                "description": "Vérifie si l'email a déjà été validé ou non.",
+                "operationId": "564c1bebe0c0cb7c9f3fc0f82ac749f6",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean@walab.bj"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Statut retourné",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "verified": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "verified_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Inscription d'un nouvel utilisateur",
+                "description": "Permet d'inscrire un Patient ou un Professionnel de santé.",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "firstname",
+                                    "lastname",
+                                    "email",
+                                    "password",
+                                    "phone",
+                                    "user_type"
+                                ],
+                                "properties": {
+                                    "firstname": {
+                                        "type": "string",
+                                        "example": "Jean"
+                                    },
+                                    "lastname": {
+                                        "type": "string",
+                                        "example": "Dupont"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jean.dupont@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123!"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "+22901020304"
+                                    },
+                                    "adress": {
+                                        "type": "string",
+                                        "example": "Cotonou, Quartier Jak"
+                                    },
+                                    "ville": {
+                                        "type": "string",
+                                        "example": "Cotonou"
+                                    },
+                                    "gender": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Masculin",
+                                            "Féminin"
+                                        ],
+                                        "example": "Masculin"
+                                    },
+                                    "date_naissance": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "1995-05-20"
+                                    },
+                                    "user_type": {
+                                        "description": "Type de compte",
+                                        "type": "string",
+                                        "enum": [
+                                            "client",
+                                            "professionnel"
+                                        ],
+                                        "example": "client"
+                                    },
+                                    "order_number": {
+                                        "description": "Requis si user_type = professionnel",
+                                        "type": "string",
+                                        "example": "MED-8392"
+                                    },
+                                    "profession": {
+                                        "description": "Requis si user_type = professionnel",
+                                        "type": "string",
+                                        "example": "Médecin Généraliste"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Inscription réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Utilisateur inscrit avec succès"
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|AbCdEf123..."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation (Email existant, champs manquants...)"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion utilisateur",
+                "description": "Authentification par email et mot de passe.",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "client@walab.bj"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "Password123"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Résultat de la tentative de connexion",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "oneOf": [
+                                        {
+                                            "description": "Connexion réussie",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Utilisateur connecté"
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "2|XyZaBc..."
+                                                },
+                                                "data": {
+                                                    "$ref": "#/components/schemas/User"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        {
+                                            "description": "Email non vérifié ou compte inactif",
+                                            "properties": {
+                                                "success": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Veuillez vérifier votre adresse email."
+                                                },
+                                                "requires_verification": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "user@mail.com"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Identifiants incorrects (si le code retourne 401, sinon 200 avec success=false)"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Déconnexion",
+                "description": "Révoque le token d'authentification actuel.",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Utilisateur déconnecté"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/blog/list": {
+            "get": {
+                "tags": [
+                    "Blog"
+                ],
+                "summary": "Liste des articles",
+                "description": "Récupère tous les articles de blog, triés du plus récent au plus ancien.",
+                "operationId": "23d1d9d93b25f7425a59ea23f0a7bea2",
+                "responses": {
+                    "200": {
+                        "description": "Liste récupérée avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Liste des articles récupérée avec succès"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Blog"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur"
+                    }
+                }
+            }
+        },
+        "/api/blog/show/{id}": {
+            "get": {
+                "tags": [
+                    "Blog"
+                ],
+                "summary": "Détail d'un article",
+                "description": "Récupère un article spécifique avec ses images de galerie.",
+                "operationId": "9d14c37f9fd01714b7dbdf5af44848dd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'article",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Article trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Article récupéré"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Blog"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Article introuvable"
+                    }
+                }
+            }
+        },
+        "/api/commande/list": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Toutes les commandes",
+                "description": "Récupère l'historique complet des commandes de l'utilisateur.",
+                "operationId": "1773f41928780432e973f61b99b7c336",
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Commande"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/list/pending": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Commandes en attente",
+                "operationId": "2e4758d2f537415541e299f4b3159c61",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/list/progress": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Commandes en cours",
+                "operationId": "3554499193e63e74551a7b732716688f",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/agent/list/pending": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Commandes Agent en attente",
+                "operationId": "21b185c4bf9244bd6fb58bd3ced8cd06",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/agent/list/progress": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Commandes Agent en cours",
+                "operationId": "09585daacbffdb2959395d3de287579f",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/list/finish": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Commandes terminées",
+                "operationId": "b7fa241b4db4750f3e5b1751061a0755",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/agent/list/finish": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Commandes Agent terminées",
+                "operationId": "a5886cb1bde9895d0812cd107baacd92",
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/get": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Détail par ID",
+                "operationId": "dce4de17b69aadd2808ea5e05f92a32e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/code": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Détail par Code",
+                "operationId": "a9471d4d7d263f80005c1a608610c639",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/create": {
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Créer une commande",
+                "operationId": "4e6e1ebcea203bd2ad1ecec8ebc24e7c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "adress",
+                                    "montant"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "example": "Prélèvement"
+                                    },
+                                    "adress": {
+                                        "type": "string",
+                                        "example": "Cotonou"
+                                    },
+                                    "montant": {
+                                        "type": "number",
+                                        "example": 5000
+                                    },
+                                    "payed": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "examen_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "type_bilan_ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Créé avec succès"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/update": {
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Mettre à jour une commande",
+                "operationId": "284b7243fe21c762ae4792a92e86e75d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Commande"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/delete": {
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Supprimer une commande",
+                "operationId": "caef781d80c59f37cda2a10eb0c4192f",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/update/statut": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Changer le statut",
+                "operationId": "2bd6eaa183a0cf2f24837e3d7d47f342",
+                "parameters": [
+                    {
+                        "name": "code_commande",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "statut",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Statut changé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/admin/list": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Toutes les commandes (Admin)",
+                "operationId": "6ea3ccdcd5b9fd36a43680fd32ba0e89",
+                "responses": {
+                    "200": {
+                        "description": "Liste admin"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/agent/list": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Liste des commandes Agent",
+                "operationId": "efc4200fa413c8d60506a2f7a0eff6c5",
+                "responses": {
+                    "200": {
+                        "description": "Liste agent"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/commande/assign/agent": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Assigner un agent (Dispatch)",
+                "description": "Assigne un agent, génère le QR Code et envoie les notifications Push.",
+                "operationId": "186dc961a380a737d871ff0b35cc98c3",
+                "parameters": [
+                    {
+                        "name": "code_commande",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "agent_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Agent assigné"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/examen/list": {
+            "get": {
+                "tags": [
+                    "Examens"
+                ],
+                "summary": "Liste des examens",
+                "description": "Récupère la liste complète des examens disponibles.",
+                "operationId": "cbc1145c55a74a0d507c400cfdf8b659",
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "listes des Examen"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Examen"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/examen/get": {
+            "get": {
+                "tags": [
+                    "Examens"
+                ],
+                "summary": "Détail d'un examen",
+                "description": "Récupère les détails d'un examen spécifique par son ID.",
+                "operationId": "6b137e49a8c5289a3ebe8c643c0ec183",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID de l'examen",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Examen"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "ID manquant ou invalide"
+                    }
+                }
+            }
+        },
+        "/api/examen/create": {
+            "post": {
+                "tags": [
+                    "Examens"
+                ],
+                "summary": "Créer un examen",
+                "description": "Ajoute un nouvel examen à la base de données. (Admin/Labo)",
+                "operationId": "574ab095d4daa895d5376aaad4e17565",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "label",
+                                    "price",
+                                    "laboratorie_id"
+                                ],
+                                "properties": {
+                                    "label": {
+                                        "type": "string",
+                                        "example": "Groupe Sanguin"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 2500
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Détermination du groupe sanguin"
+                                    },
+                                    "laboratorie_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "icon": {
+                                        "type": "string",
+                                        "example": "url_image"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Examen créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "create Examen"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Examen"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/examen/update": {
+            "post": {
+                "tags": [
+                    "Examens"
+                ],
+                "summary": "Mettre à jour un examen",
+                "operationId": "2c9eb2592d429e554b2f401242e9f25a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "example": "Nouveau Nom"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 3000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Examen mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "update Examen"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Examen"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/examen/delete": {
+            "post": {
+                "tags": [
+                    "Examens"
+                ],
+                "summary": "Supprimer un examen",
+                "operationId": "ac9f76077ba26540cc8af90a52b18f5d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Examen supprimé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "delete Examen"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/typebilan/list": {
+            "get": {
+                "tags": [
+                    "TypeBilan"
+                ],
+                "summary": "Liste des bilans",
+                "description": "Récupère la liste complète des types de bilans disponibles.",
+                "operationId": "2b2f8a7397bcbccf79bc0cfe6d110565",
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "listes des TypeBilan"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TypeBilan"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/typebilan/get": {
+            "get": {
+                "tags": [
+                    "TypeBilan"
+                ],
+                "summary": "Détail d'un bilan",
+                "description": "Récupère les détails d'un bilan spécifique par son ID.",
+                "operationId": "13bfc90db9692388711efa56584b92f5",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID du bilan",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TypeBilan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "ID invalide"
+                    }
+                }
+            }
+        },
+        "/api/typebilan/create": {
+            "post": {
+                "tags": [
+                    "TypeBilan"
+                ],
+                "summary": "Créer un bilan",
+                "description": "Ajoute un nouveau type de bilan. (Admin/Labo)",
+                "operationId": "4f2a38e0c3a36c808a05daa7b859a67e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "label",
+                                    "price",
+                                    "laboratorie_id"
+                                ],
+                                "properties": {
+                                    "label": {
+                                        "type": "string",
+                                        "example": "Bilan Prénuptial"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 20000
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Description du bilan"
+                                    },
+                                    "laboratorie_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "icon": {
+                                        "type": "string",
+                                        "example": "image_url"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bilan créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "create TypeBilan"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/TypeBilan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/typebilan/update": {
+            "post": {
+                "tags": [
+                    "TypeBilan"
+                ],
+                "summary": "Mettre à jour un bilan",
+                "operationId": "e629e5389e691fb612163baa88fd13cf",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "example": "Nouveau Nom Bilan"
+                                    },
+                                    "price": {
+                                        "type": "number",
+                                        "example": 22000
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mis à jour avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "update TypeBilan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/typebilan/delete": {
+            "post": {
+                "tags": [
+                    "TypeBilan"
+                ],
+                "summary": "Supprimer un bilan",
+                "operationId": "e79f8276352ad403a7a63dd98ec0d416",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 10
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Supprimé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "delete TypeBilan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resultat/list": {
+            "get": {
+                "tags": [
+                    "Résultats"
+                ],
+                "summary": "Mes résultats",
+                "description": "Récupère la liste des résultats d'analyses de l'utilisateur connecté.",
+                "operationId": "50412722fa8a07f28f6b28ab8ed4e669",
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "code": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "listes des Resultats"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Resultat"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resultat/get": {
+            "get": {
+                "tags": [
+                    "Résultats"
+                ],
+                "summary": "Détail d'un résultat",
+                "operationId": "223867f3fd08b57c3c3d41014d09ed9d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "ID du résultat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Resultat"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "ID manquant ou invalide"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resultat/create": {
+            "post": {
+                "tags": [
+                    "Résultats"
+                ],
+                "summary": "Uploader un résultat",
+                "description": "Ajoute un fichier PDF de résultat pour une commande. (Admin/Labo)",
+                "operationId": "1f5ed06cfe74ecda22746fe4e13fab9e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "code_commande",
+                                    "pdf_url"
+                                ],
+                                "properties": {
+                                    "code_commande": {
+                                        "description": "Code de la commande liée",
+                                        "type": "string",
+                                        "example": "CMD-XXXX"
+                                    },
+                                    "pdf_url": {
+                                        "description": "Fichier PDF (max 10Mo)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "pdf_password": {
+                                        "description": "Mot de passe optionnel pour le PDF",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Résultat créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "create Resultat"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/Resultat"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resultat/update": {
+            "post": {
+                "tags": [
+                    "Résultats"
+                ],
+                "summary": "Mettre à jour un résultat",
+                "operationId": "31dab039c587cfa83bdcef50ba555743",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "id",
+                                    "code_commande"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "code_commande": {
+                                        "type": "string",
+                                        "example": "CMD-XXXX"
+                                    },
+                                    "pdf_url": {
+                                        "description": "Nouveau fichier PDF (Optionnel)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "pdf_password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Résultat mis à jour"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resultat/delete": {
+            "post": {
+                "tags": [
+                    "Résultats"
+                ],
+                "summary": "Supprimer un résultat",
+                "operationId": "01a3bcd7025dc3d63af6ef1dc323b7a8",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "id"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Résultat supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resultat/admin/list": {
+            "get": {
+                "tags": [
+                    "Résultats"
+                ],
+                "summary": "Tous les résultats (Admin)",
+                "operationId": "65bb71d4ae1607b31ef409ae591224e6",
+                "responses": {
+                    "200": {
+                        "description": "Liste complète pour administration"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Blog": {
+                "title": "Article de Blog",
+                "description": "Modèle d'un article",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Les bienfaits du bilan sanguin"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "les-bienfaits-du-bilan-sanguin"
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "example": "Découvrez pourquoi il est important..."
+                    },
+                    "content": {
+                        "type": "string",
+                        "example": "<p>Contenu HTML...</p>"
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "example": "http://localhost:8000/storage/blogs/image.jpg"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Commande": {
+                "title": "Commande",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "code": {
+                        "type": "string",
+                        "example": "CMD-8392"
+                    },
+                    "statut": {
+                        "type": "string",
+                        "example": "En cours"
+                    },
+                    "montant": {
+                        "type": "number",
+                        "example": 15000
+                    },
+                    "date_prelevement": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Examen": {
+                "title": "Examen Médical",
+                "description": "Détail d'une analyse médicale disponible",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "NFS (Numération Formule Sanguine)"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4500
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Analyse complète du sang..."
+                    },
+                    "icon": {
+                        "type": "string",
+                        "example": "examen/nfs.png"
+                    },
+                    "laboratorie_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "isactive": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Resultat": {
+                "title": "Résultat d'analyse",
+                "description": "Fichier PDF contenant les résultats médicaux",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "code_commande": {
+                        "type": "string",
+                        "example": "CMD-8392"
+                    },
+                    "pdf_url": {
+                        "type": "string",
+                        "example": "resultats/file.pdf"
+                    },
+                    "pdf_password": {
+                        "description": "Mot de passe pour ouvrir le PDF",
+                        "type": "string",
+                        "example": "XYZ123"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "TypeBilan": {
+                "title": "Type de Bilan",
+                "description": "Modèle représentant un bilan médical complet (pack d'examens)",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Bilan Général"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 15000
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Bilan complet incluant NFS, Glycémie..."
+                    },
+                    "icon": {
+                        "type": "string",
+                        "example": "defaut_image.jpg"
+                    },
+                    "laboratorie_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "isactive": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "Utilisateur",
+                "description": "Modèle utilisateur standard",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "Jean"
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Dupont"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "jean@mail.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+22901020304"
+                    },
+                    "role_id": {
+                        "type": "integer",
+                        "example": 3
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Entrez votre token d'accès ici (sans le préfixe 'Bearer')",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Vérification Email",
+            "description": "Gestion de la validation des emails via OTP (One Time Password)"
+        },
+        {
+            "name": "Authentification",
+            "description": "Gestion de la connexion, inscription et déconnexion."
+        },
+        {
+            "name": "Blog",
+            "description": "Gestion des articles de blog et des médias associés."
+        },
+        {
+            "name": "Commandes",
+            "description": "Gestion des commandes d'analyses (Création, Suivi, Assignation, Listes)"
+        },
+        {
+            "name": "Examens",
+            "description": "Gestion du catalogue des examens et analyses médicales"
+        },
+        {
+            "name": "TypeBilan",
+            "description": "Gestion des bilans médicaux (Packages d'examens)"
+        },
+        {
+            "name": "Résultats",
+            "description": "Gestion des résultats d'analyses (PDF, Mots de passe)"
+        }
+    ]
+}

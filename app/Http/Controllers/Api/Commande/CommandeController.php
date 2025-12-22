@@ -22,6 +22,12 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Tag(
+ *     name="Commandes",
+ *     description="Gestion des commandes d'analyses (Création, Suivi, Assignation, Listes)"
+ * )
+ */
 class CommandeController extends Controller
 {
     /**
@@ -50,7 +56,21 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande
+     * @OA\Get(
+     *     path="/api/commande/list",
+     *     summary="Toutes les commandes",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     description="Récupère l'historique complet des commandes de l'utilisateur.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Commande"))
+     *         )
+     *     )
+     * )
      */
     public function listCommande(Request $request)
     {
@@ -63,7 +83,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande en attente
+     * @OA\Get(
+     *     path="/api/commande/list/pending",
+     *     summary="Commandes en attente",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function listCommandePending(Request $request)
     {
@@ -76,7 +102,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande encours
+     * @OA\Get(
+     *     path="/api/commande/list/progress",
+     *     summary="Commandes en cours",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function listCommandeProgress(Request $request)
     {
@@ -89,7 +121,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande Agent en attente
+     * @OA\Get(
+     *     path="/api/commande/agent/list/pending",
+     *     summary="Commandes Agent en attente",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function listCommandePendingAgent(Request $request)
     {
@@ -102,7 +140,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande Agent encours
+     * @OA\Get(
+     *     path="/api/commande/agent/list/progress",
+     *     summary="Commandes Agent en cours",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function listCommandeProgressAgent(Request $request)
     {
@@ -115,7 +159,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande terminer
+     * @OA\Get(
+     *     path="/api/commande/list/finish",
+     *     summary="Commandes terminées",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function listCommandeFinish(Request $request)
     {
@@ -128,7 +178,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * listes Commande Agent terminer
+     * @OA\Get(
+     *     path="/api/commande/agent/list/finish",
+     *     summary="Commandes Agent terminées",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function listCommandeFinishAgent(Request $request)
     {
@@ -142,7 +198,14 @@ class CommandeController extends Controller
 
 
     /**
-     * get Commande
+     * @OA\Get(
+     *     path="/api/commande/get",
+     *     summary="Détail par ID",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function get(Request $request)
     {
@@ -166,7 +229,14 @@ class CommandeController extends Controller
     }
 
     /**
-     * get Commande par code
+     * @OA\Get(
+     *     path="/api/commande/code",
+     *     summary="Détail par Code",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="code", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Succès")
+     * )
      */
     public function get_CommandeByCode(Request $request)
     {
@@ -190,7 +260,25 @@ class CommandeController extends Controller
     }
 
     /**
-     * create Commande
+     * @OA\Post(
+     *     path="/api/commande/create",
+     *     summary="Créer une commande",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"type", "adress", "montant"},
+     *             @OA\Property(property="type", type="string", example="Prélèvement"),
+     *             @OA\Property(property="adress", type="string", example="Cotonou"),
+     *             @OA\Property(property="montant", type="number", example=5000),
+     *             @OA\Property(property="payed", type="boolean", example=false),
+     *             @OA\Property(property="examen_ids", type="array", @OA\Items(type="integer")),
+     *             @OA\Property(property="type_bilan_ids", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Créé avec succès")
+     * )
      */
     public function create(CommandeRequest $request)
     {
@@ -204,7 +292,17 @@ class CommandeController extends Controller
     }
 
     /**
-     * update Commande.
+     * @OA\Post(
+     *     path="/api/commande/update",
+     *     summary="Mettre à jour une commande",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/Commande")
+     *     ),
+     *     @OA\Response(response=200, description="Mis à jour")
+     * )
      */
     public function update(CommandeUpdateRequest $request)
     {
@@ -218,7 +316,17 @@ class CommandeController extends Controller
 
 
     /**
-     * Delete Commande
+     * @OA\Post(
+     *     path="/api/commande/delete",
+     *     summary="Supprimer une commande",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(@OA\Property(property="id", type="integer"))
+     *     ),
+     *     @OA\Response(response=200, description="Supprimé")
+     * )
      */
     public function delete(Request $request)
     {
@@ -246,7 +354,15 @@ class CommandeController extends Controller
     }
 
     /**
-     * Change Statut
+     * @OA\Get(
+     *     path="/api/commande/update/statut",
+     *     summary="Changer le statut",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(name="code_commande", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="statut", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Statut changé")
+     * )
      */
     public function changeStatut(Request $request)
     {
@@ -272,7 +388,13 @@ class CommandeController extends Controller
     }
 
     /**
-     * list commande Admin
+     * @OA\Get(
+     *     path="/api/commande/admin/list",
+     *     summary="Toutes les commandes (Admin)",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Liste admin")
+     * )
      */
     public function listCommandeAdmin()
     {
@@ -287,7 +409,13 @@ class CommandeController extends Controller
 
 
     /**
-     * listes des Commmande d'un Agent
+     * @OA\Get(
+     *     path="/api/commande/agent/list",
+     *     summary="Liste des commandes Agent",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Liste agent")
+     * )
      */
     public function listCommmandeAgent(Request $request)
     {
@@ -309,7 +437,16 @@ class CommandeController extends Controller
 
 
     /**
-     *  lie agent commande
+     * @OA\Get(
+     *     path="/api/commande/assign/agent",
+     *     summary="Assigner un agent (Dispatch)",
+     *     tags={"Commandes"},
+     *     security={{"bearerAuth":{}}},
+     *     description="Assigne un agent, génère le QR Code et envoie les notifications Push.",
+     *     @OA\Parameter(name="code_commande", in="query", required=true, @OA\Schema(type="string")),
+     *     @OA\Parameter(name="agent_id", in="query", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(response=200, description="Agent assigné")
+     * )
      */
     public function AssignAgentCommande(Request $request)
     {
@@ -338,8 +475,6 @@ class CommandeController extends Controller
             }
         }
         $commande = Commande::where('code', $request->code_commande)->first();
-
-
 
         // Création du message automatique dans le chat
         $this->chatRepository->create_ChatCommande(
@@ -401,9 +536,6 @@ class CommandeController extends Controller
         // --- NOTIFICATIONS DATABASE (Existantes) ---
         User::find($commande->client_id)->notify(new CommandeNotification('commande', 'Votre commande : ' . $commande->code . ' est en cours de traitement. Veillez rejoindre la discussion!'));
         User::find($commande->agent_id)->notify(new CommandeNotification('commande', 'Une nouvelle commande vous a été assigner, Voici le code de la commande : ' . $commande->code. '. Veillez rejoindre la discussion!'));
-
-        // --- NOTIFICATIONS PUSH (Nouvelles) ---
-
 
         // --- EMAILS (Existants) ---
         $this->sendEmail->sendMail($commande->agent_id, 'Une nouvelle commande vous a été assigner, Voici le code de la commande:' . $commande->code);

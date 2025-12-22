@@ -17,6 +17,12 @@ use App\Notifications\VerifyEmailNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * @OA\Tag(
+ *     name="Authentification",
+ *     description="Gestion de la connexion, inscription et déconnexion."
+ * )
+ */
 class AuthController extends Controller
 {
 
@@ -42,25 +48,20 @@ class AuthController extends Controller
             'lastname' => isset($request->lastname) ? $request->lastname : null,
             'email' => isset($request->email) ? $request->email : null,
             'gender' => isset($request->gender) ? $request->gender : null,
-            // 'country' => isset($request->lastname) ? $request->lastname : null,
             'city' => isset($request->city) ? $request->city : null,
             'date_naissance' => isset($request->date_naissance) ? $request->date_naissance : null,
             'adress' => isset($request->adress) ? $request->adress : null,
             'phone' => isset($request->phone) ? $request->phone : null,
             'url_profil' =>  $path,
-            'role_id' => isset($request->role_id) ? $request->role_id : null, 
+            'role_id' => isset($request->role_id) ? $request->role_id : null,
             'password' => Hash::make(isset($request->phone) ? $request->phone : 12345678),
-            // 'status' => isset($request->status) ? $request->status : null,
-        
         ]);
 
         return $user;
-
     }
 
     public function update_web(Request $request)
     {
-
         $path = "";
         if($request->url_profil)
         {
@@ -82,13 +83,52 @@ class AuthController extends Controller
             'adress' => isset($request->adress) ? $request->adress : null,
             'phone' => isset($request->phone) ? $request->phone : null,
             'url_profil' =>  $path,
-            'role_id' => isset($request->role_id) ? $request->role_id : null, 
+            'role_id' => isset($request->role_id) ? $request->role_id : null,
         ]);
 
         return $user;
-
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/register",
+     *     summary="Inscription d'un nouvel utilisateur",
+     *     tags={"Authentification"},
+     *     description="Permet d'inscrire un Patient ou un Professionnel de santé.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"firstname", "lastname", "email", "password", "phone", "user_type"},
+     *             @OA\Property(property="firstname", type="string", example="Jean"),
+     *             @OA\Property(property="lastname", type="string", example="Dupont"),
+     *             @OA\Property(property="email", type="string", format="email", example="jean.dupont@example.com"),
+     *             @OA\Property(property="password", type="string", format="password", example="Password123!"),
+     *             @OA\Property(property="phone", type="string", example="+22901020304"),
+     *             @OA\Property(property="adress", type="string", example="Cotonou, Quartier Jak"),
+     *             @OA\Property(property="ville", type="string", example="Cotonou"),
+     *             @OA\Property(property="gender", type="string", enum={"Masculin", "Féminin"}, example="Masculin"),
+     *             @OA\Property(property="date_naissance", type="string", format="date", example="1995-05-20"),
+     *             @OA\Property(property="user_type", type="string", enum={"client", "professionnel"}, example="client", description="Type de compte"),
+     *             @OA\Property(property="order_number", type="string", example="MED-8392", description="Requis si user_type = professionnel"),
+     *             @OA\Property(property="profession", type="string", example="Médecin Généraliste", description="Requis si user_type = professionnel")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Inscription réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Utilisateur inscrit avec succès"),
+     *             @OA\Property(property="token", type="string", example="1|AbCdEf123..."),
+     *             @OA\Property(property="data", type="object", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation (Email existant, champs manquants...)"
+     *     )
+     * )
+     */
     public function register(RegisterRequest $request)
     {
         $validated = $request->validated();
@@ -113,18 +153,15 @@ class AuthController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
-        // Définir le role_id selon le type d'utilisateur
         if ($userType === 'professionnel') {
             $practitionerRole = Role::where('label', 'practitioner')->first();
-            $validated['role_id'] = $practitionerRole ? $practitionerRole->id : 3; // 3 = client par défaut
+            $validated['role_id'] = $practitionerRole ? $practitionerRole->id : 3;
         } else {
-            $validated['role_id'] = 3; // Client par défaut
+            $validated['role_id'] = 3;
         }
 
-        // Créer l'utilisateur
         $user = $this->user->create($validated);
 
-        // Si c'est un professionnel, créer l'entrée practitioner
         if ($userType === 'professionnel' && $orderNumber && $profession) {
             $certificatePath = null;
             
@@ -140,11 +177,10 @@ class AuthController extends Controller
                 'profession' => $profession,
                 'certificate_url' => $certificatePath,
                 'verification_status' => 'pending',
-                'profile_completion' => 20, // Base completion
+                'profile_completion' => 20,
             ]);
         }
 
-        // Envoyer l'email de vérification
         try {
             Log::info('Envoi email vérification inscription', [
                 'email' => $user->email,
@@ -173,12 +209,54 @@ class AuthController extends Controller
             'success' => true,
             'token' => $token,
             'data' => $user,
-            'message' => $userType === 'professionnel' 
-                ? 'Inscription réussie. Votre compte sera validé par un administrateur.' 
+            'message' => $userType === 'professionnel'
+                ? 'Inscription réussie. Votre compte sera validé par un administrateur.'
                 : 'Utilisateur inscrit avec succès'
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/login",
+     *     summary="Connexion utilisateur",
+     *     tags={"Authentification"},
+     *     description="Authentification par email et mot de passe.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email", "password"},
+     *             @OA\Property(property="email", type="string", format="email", example="client@walab.bj"),
+     *             @OA\Property(property="password", type="string", format="password", example="Password123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Résultat de la tentative de connexion",
+     *         @OA\JsonContent(
+     *             oneOf={
+     *                 @OA\Schema(
+     *                     description="Connexion réussie",
+     *                     @OA\Property(property="success", type="boolean", example=true),
+     *                     @OA\Property(property="message", type="string", example="Utilisateur connecté"),
+     *                     @OA\Property(property="token", type="string", example="2|XyZaBc..."),
+     *                     @OA\Property(property="data", type="object", ref="#/components/schemas/User")
+     *                 ),
+     *                 @OA\Schema(
+     *                     description="Email non vérifié ou compte inactif",
+     *                     @OA\Property(property="success", type="boolean", example=false),
+     *                     @OA\Property(property="message", type="string", example="Veuillez vérifier votre adresse email."),
+     *                     @OA\Property(property="requires_verification", type="boolean", example=true),
+     *                     @OA\Property(property="email", type="string", example="user@mail.com")
+     *                 )
+     *             }
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Identifiants incorrects (si le code retourne 401, sinon 200 avec success=false)"
+     *     )
+     * )
+     */
     public function login(LoginRequest $request)
     {
         $validated = $request->validated();
@@ -191,7 +269,6 @@ class AuthController extends Controller
             ]);
         }
 
-        // Si email non vérifié, demander OTP
         if (!$user->email_verified_at) {
             return response()->json([
                 'success' => false,
@@ -201,8 +278,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Pour les praticiens et labs, vérifier le statut admin
-        if (in_array($user->role_id, [5, 6])) { // 5: lab, 6: practitioner
+        if (in_array($user->role_id, [5, 6])) {
             if ($user->status !== 'active') {
                 return response()->json([
                     'success' => false,
@@ -221,9 +297,29 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Déconnexion",
+     *     tags={"Authentification"},
+     *     security={{"bearerAuth":{}}},
+     *     description="Révoque le token d'authentification actuel.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Déconnexion réussie",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Utilisateur déconnecté")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     )
+     * )
+     */
     public function logout()
     {
-        // Auth::logout();
         $user = Auth::user();
         $user->tokens()->delete();
 

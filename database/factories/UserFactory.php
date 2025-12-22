@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' =>  Hash::make('password'),
             'remember_token' => Str::random(10),
-            'role_id' => 3, // Default to client role
+            'role_id' => \App\Models\Role::where('value', 'client')->first()?->id ?? 3,
         ];
     }
 

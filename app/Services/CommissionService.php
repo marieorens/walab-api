@@ -53,12 +53,10 @@ class CommissionService
             return false;
         }
 
-        // Calcul basé sur les frais de service si disponibles, sinon sur le montant total (legacy)
-        $commande = Commande::where('code', $paiement->code_commande)->first();
-        $montantService = ($commande && $commande->frais_service > 0) ? $commande->frais_service : floatval($paiement->montant);
-        
         $pourcentage = $laboratoire->pourcentage_commission ?? 0;
-        $commission = $this->calculate($montantService, $pourcentage);
+        $montantTotal = floatval($paiement->montant);
+
+        $commission = $this->calculate($montantTotal, $pourcentage);
 
         $paiement->update([
             'laboratoire_id' => $laboratoire->id,
@@ -117,20 +115,6 @@ class CommissionService
                     $paiement->id
                 );
             }
-
-            // Crédit de l'agent si déjà assigné lors du paiement online
-            $commande = Commande::where('code', $paiement->code_commande)->first();
-            if ($commande && $commande->agent_id && $commande->frais_deplacement > 0) {
-                $walletAgent = Wallet::getOrCreateForUser($commande->agent_id, 'agent');
-                if ($walletAgent && $walletAgent->isActive()) {
-                    $walletAgent->credit(
-                        $commande->frais_deplacement,
-                        "Frais de déplacement paiement #{$paiement->id} - Commande {$commande->code}",
-                        $paiement->id,
-                        $commande->id
-                    );
-                }
-            }
         }
     }
 
@@ -176,10 +160,9 @@ class CommissionService
         if (!$laboratoire) return false;
 
         $pourcentage = $laboratoire->pourcentage_commission ?? 0;
-        $montantService = $commande->frais_service > 0 ? $commande->frais_service : floatval($commande->montant);
-        $commission = $this->calculate($montantService, $pourcentage);
+        $montant = floatval($commande->montant);
+        $commission = $this->calculate($montant, $pourcentage);
 
-        $walletPlateforme = Wallet::getPlateforme();
         if ($paiement->status === \App\Enum\StatutPaiementEnum::PHYSICAL->value) {
             if ($laboratoire->user_id && $commission['montant_plateforme'] > 0) {
                 $walletLabo = Wallet::getOrCreateForUser($laboratoire->user_id, 'laboratoire');
@@ -191,6 +174,7 @@ class CommissionService
                 );
             }
 
+            $walletPlateforme = Wallet::getPlateforme();
             if ($walletPlateforme && $commission['montant_plateforme'] > 0) {
                 $walletPlateforme->credit(
                     $commission['montant_plateforme'],
@@ -210,6 +194,7 @@ class CommissionService
                 );
             }
 
+            $walletPlateforme = Wallet::getPlateforme();
             if ($walletPlateforme && $commission['montant_plateforme'] > 0) {
                 $walletPlateforme->credit(
                     $commission['montant_plateforme'],
@@ -217,27 +202,6 @@ class CommissionService
                     $paiement->id,
                     $commande->id
                 );
-            }
-
-            // Crédit de l'agent (Frais de déplacement)
-            if ($commande->agent_id && $commande->frais_deplacement > 0) {
-                $walletAgent = Wallet::getOrCreateForUser($commande->agent_id, 'agent');
-                if ($walletAgent && $walletAgent->isActive()) {
-                    // Éviter double crédit
-                    $alreadyCreditedAgent = \App\Models\WalletTransaction::where('commande_id', $commande->id)
-                        ->where('wallet_id', $walletAgent->id)
-                        ->where('type', 'credit')
-                        ->exists();
-
-                    if (!$alreadyCreditedAgent) {
-                        $walletAgent->credit(
-                            $commande->frais_deplacement,
-                            "Frais de déplacement commande #{$commande->code}",
-                            $paiement->id,
-                            $commande->id
-                        );
-                    }
-                }
             }
         }
 

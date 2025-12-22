@@ -11,6 +11,12 @@ use Illuminate\Auth\AuthManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @OA\Tag(
+ *     name="Examens",
+ *     description="Gestion du catalogue des examens et analyses médicales"
+ * )
+ */
 class ExamenController extends Controller
 {
     /**
@@ -30,7 +36,22 @@ class ExamenController extends Controller
     }
 
     /**
-     * listes Examen
+     * @OA\Get(
+     *     path="/api/examen/list",
+     *     summary="Liste des examens",
+     *     tags={"Examens"},
+     *     description="Récupère la liste complète des examens disponibles.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="message", type="string", example="listes des Examen"),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Examen"))
+     *         )
+     *     )
+     * )
      */
     public function listExamen(Request $request)
     {
@@ -44,7 +65,32 @@ class ExamenController extends Controller
 
 
     /**
-     * get Examen
+     * @OA\Get(
+     *     path="/api/examen/get",
+     *     summary="Détail d'un examen",
+     *     tags={"Examens"},
+     *     description="Récupère les détails d'un examen spécifique par son ID.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         required=true,
+     *         description="ID de l'examen",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="code", type="integer", example=200),
+     *             @OA\Property(property="data", ref="#/components/schemas/Examen")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="ID manquant ou invalide"
+     *     )
+     * )
      */
     public function get(Request $request)
     {
@@ -58,7 +104,7 @@ class ExamenController extends Controller
                 'errors' => $validator->errors()
             ]);
         }
-        
+
         return response()->json([
             'success' => true,
             'code' => 200,
@@ -67,10 +113,34 @@ class ExamenController extends Controller
         ]);
     }
 
-
-
     /**
-     * create Examen
+     * @OA\Post(
+     *     path="/api/examen/create",
+     *     summary="Créer un examen",
+     *     tags={"Examens"},
+     *     security={{"bearerAuth":{}}},
+     *     description="Ajoute un nouvel examen à la base de données. (Admin/Labo)",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"label", "price", "laboratorie_id"},
+     *             @OA\Property(property="label", type="string", example="Groupe Sanguin"),
+     *             @OA\Property(property="price", type="number", example=2500),
+     *             @OA\Property(property="description", type="string", example="Détermination du groupe sanguin"),
+     *             @OA\Property(property="laboratorie_id", type="integer", example=1),
+     *             @OA\Property(property="icon", type="string", example="url_image")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Examen créé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="create Examen"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Examen")
+     *         )
+     *     )
+     * )
      */
     public function create(ExamenRequest $request)
     {
@@ -83,7 +153,30 @@ class ExamenController extends Controller
     }
 
     /**
-     * update Examen.
+     * @OA\Post(
+     *     path="/api/examen/update",
+     *     summary="Mettre à jour un examen",
+     *     tags={"Examens"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id"},
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="label", type="string", example="Nouveau Nom"),
+     *             @OA\Property(property="price", type="number", example=3000)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Examen mis à jour",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="update Examen"),
+     *             @OA\Property(property="data", ref="#/components/schemas/Examen")
+     *         )
+     *     )
+     * )
      */
     public function update(ExamenUpdateRequest $request)
     {
@@ -95,9 +188,28 @@ class ExamenController extends Controller
         ]);
     }
 
-   
     /**
-     * Delete Examen
+     * @OA\Post(
+     *     path="/api/examen/delete",
+     *     summary="Supprimer un examen",
+     *     tags={"Examens"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"id"},
+     *             @OA\Property(property="id", type="integer", example=1)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Examen supprimé",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="delete Examen")
+     *         )
+     *     )
+     * )
      */
     public function delete(Request $request)
     {
@@ -119,8 +231,6 @@ class ExamenController extends Controller
             'success' => true,
             'code' => 200,
             'message' => 'delete Examen',
-            // 'data' => $this->Examen
         ]);
-
     }
 }
