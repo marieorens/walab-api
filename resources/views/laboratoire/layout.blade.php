@@ -12,18 +12,8 @@
     <meta content="Espace laboratoire Walab" name="description" />
     <meta content="Walab" name="author" />
 
-    <!-- App favicon -->
-    <link rel="shortcut icon" href="{{asset('assets/images/logo.png')}}">
-
-    <!-- Theme Config Js -->
-    <script src="{{asset('assets/js/config.js')}}"></script>
-
-    <!-- App css -->
-    <link href="{{asset('assets/css/app.min.css')}}" rel="stylesheet" type="text/css" id="app-style" />
-
-    <!-- Icons css -->
-    <link href="{{asset('assets/css/icons.min.css')}}" rel="stylesheet" type="text/css" />
-    <link href="{{asset('assets/css/style.css')}}" rel="stylesheet" type="" />
+    <!-- Vite assets -->
+    @vite(["resources/css/app.css", "resources/js/app.js"])
 
     <style>
         .lab-sidebar {
