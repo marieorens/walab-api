@@ -27,9 +27,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrap();
-        
+
+        if (app()->environment('production')) {
+            \URL::forceScheme('https');
+        }
+
         Paiement::observe(PaiementObserver::class);
-        
+
         Scramble::extendOpenApi(function (OpenApi $openApi) {
             $openApi->secure(
                 SecurityScheme::http('bearer', 'JWT')
