@@ -38,6 +38,5 @@ ehthumbs.db
 Thumbs.db
 *.log
 logs/
-*.sqlite
 *.sqlite3
 database/database.sqlite
