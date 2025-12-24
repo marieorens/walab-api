@@ -27,6 +27,7 @@ WORKDIR /var/www/html
 COPY . .
 
 RUN mkdir -p /var/www/html/database && touch /var/www/html/database/database.sqlite
+RUN sqlite3 /var/www/html/database/database.sqlite ".tables"
 
 RUN composer install --no-dev --optimize-autoloader
 RUN composer require doctrine/dbal --no-interaction --no-progress --no-scripts
