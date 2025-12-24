@@ -1,4 +1,3 @@
-RUN sqlite3 /var/www/html/database/database.sqlite ".tables"
 FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
@@ -7,6 +6,7 @@ RUN apk add --no-cache \
     gettext \
     nodejs \
     npm \
+    sqlite \
     libpng-dev \
     libjpeg-turbo-dev \
     freetype-dev \
@@ -34,6 +34,7 @@ RUN composer require doctrine/dbal --no-interaction --no-progress --no-scripts
 RUN npm install && npm run build
 RUN php artisan config:clear
 RUN php artisan migrate --force
+RUN php artisan db:seed --force
 RUN php artisan cache:clear
 RUN php artisan config:cache
 RUN php artisan storage:link || true
