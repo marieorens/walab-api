@@ -31,8 +31,6 @@ RUN composer require doctrine/dbal --no-interaction --no-progress --no-scripts
 RUN npm install && npm run build
 RUN php artisan config:clear
 ENV DB_CONNECTION=mysql
-RUN php artisan migrate --force
-RUN php artisan db:seed --force
 RUN php artisan cache:clear
 RUN php artisan config:cache
 RUN php artisan storage:link || true
