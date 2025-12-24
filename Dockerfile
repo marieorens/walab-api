@@ -30,6 +30,7 @@ RUN mkdir -p /var/www/html/database && touch /var/www/html/database/database.sql
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 RUN php artisan config:clear
+RUN php artisan migrate --force
 RUN php artisan cache:clear
 RUN php artisan config:cache
 RUN php artisan storage:link || true
