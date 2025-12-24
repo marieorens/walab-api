@@ -28,6 +28,7 @@ COPY . .
 RUN mkdir -p /var/www/html/database && touch /var/www/html/database/database.sqlite
 
 RUN composer install --no-dev --optimize-autoloader
+RUN composer require doctrine/dbal --no-interaction --no-progress --no-scripts
 RUN npm install && npm run build
 RUN php artisan config:clear
 RUN php artisan migrate --force
