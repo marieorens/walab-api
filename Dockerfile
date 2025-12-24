@@ -1,3 +1,4 @@
+RUN sqlite3 /var/www/html/database/database.sqlite ".tables"
 FROM php:8.4-fpm-alpine
 
 RUN apk add --no-cache \
