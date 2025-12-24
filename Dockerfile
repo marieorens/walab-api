@@ -24,7 +24,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 
 COPY . .
-COPY database.sqlite ./database.sqlite
+
+RUN touch /var/www/html/database.sqlite
 
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
