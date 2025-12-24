@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('push_subscriptions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->morphs('subscribable', 'push_subscriptions_subscribable_morph_idx');
+            $table->morphs('subscribable'); // index morph standard pour MySQL
             $table->string('endpoint', 500)->unique();
             $table->string('public_key')->nullable();
             $table->string('auth_token')->nullable();

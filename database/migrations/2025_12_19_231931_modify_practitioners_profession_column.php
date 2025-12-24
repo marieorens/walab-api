@@ -12,10 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modifier la colonne profession de enum à string (compatible SQLite et autres via doctrine/dbal)
-        Schema::table('practitioners', function (Blueprint $table) {
-            $table->string('profession', 100)->nullable(false)->change();
-        });
+        // Modifier la colonne profession de enum à string (MySQL)
+        DB::statement("ALTER TABLE practitioners MODIFY profession VARCHAR(100) NOT NULL");
     }
 
     /**
@@ -23,6 +21,16 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Impossible de remettre en enum de façon portable avec SQLite, on laisse en string
+        // Remettre en enum (MySQL)
+        DB::statement("ALTER TABLE practitioners MODIFY profession ENUM(
+            'general_practitioner',
+            'specialist_doctor',
+            'midwife',
+            'nurse',
+            'nursing_assistant',
+            'physiotherapist',
+            'psychologist',
+            'nutritionist'
+        ) NOT NULL");
     }
 };
